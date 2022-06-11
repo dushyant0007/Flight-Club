@@ -1,21 +1,38 @@
 from twilio.rest import Client
+import os
+import smtplib
 
-TWILIO_SID = YOUR TWILIO ACCOUNT SID
-TWILIO_AUTH_TOKEN = YOUR TWILIO AUTH TOKEN
-TWILIO_VIRTUAL_NUMBER = YOUR TWILIO VIRTUAL NUMBER
-TWILIO_VERIFIED_NUMBER = YOUR TWILIO VERIFIED NUMBER
+# Twilio API Authentication Data
+account_sid = os.environ['TWILIO_ACCOUNT_SID']
+auth_token = os.environ['TWILIO_AUTH_TOKEN']
+twilio_no = os.environ["TWILIO_NO"]
+user_no = os.environ["USER_NO"]
+
+# Email id username and password
+my_email = os.environ.get("EMAIL_ID")
+password = os.environ.get("EMAIL_PASSWORD")
 
 
 class NotificationManager:
-
+    """This class is responsible for sending notifications with the deal flight details."""
     def __init__(self):
-        self.client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+        self.client = Client(account_sid, auth_token)
 
-    def send_sms(self, message):
+    def send_sms(self,message):
         message = self.client.messages.create(
             body=message,
-            from_=TWILIO_VIRTUAL_NUMBER,
-            to=TWILIO_VERIFIED_NUMBER,
+            from_=twilio_no,
+            to=user_no
         )
-        # Prints if successfully sent.
         print(message.sid)
+
+    def send_mails(self, emails, message, google_link):
+        with smtplib.SMTP("smtp.live.com") as connection:
+            connection.starttls()
+            connection.login(user=my_email, password=password)
+            for user in emails:
+                connection.sendmail(
+                    from_addr=my_email,
+                    to_addrs="samrood.kl@gmail.com",
+                    msg=f"Subject:Flight deal from Flight Club\n\n{message}\nlink:{google_link}".encode("utf-8")
+                )
